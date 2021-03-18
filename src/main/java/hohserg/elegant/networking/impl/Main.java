@@ -25,6 +25,7 @@ public class Main {
                 Loader.instance().getActiveModList()
                         .stream()
                         .map(mod -> new Init.ModInfo(mod.getModId(), mod.getSource()))
+                        .filter(mod -> mod.getSource().exists())
                         .collect(Collectors.toList()),
                 log::error,
                 Network.getNetwork()::registerChannel

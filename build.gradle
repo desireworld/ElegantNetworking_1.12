@@ -10,12 +10,16 @@ buildscript {
         }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+//        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
         classpath 'net.ltgt.gradle:gradle-apt-plugin:0.9'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
     }
 }
 
-apply plugin: "net.minecraftforge.gradle.forge"
+//apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'java'
 apply plugin: 'net.ltgt.apt'
 apply plugin: 'maven'
@@ -28,9 +32,8 @@ group = modGroup
 archivesBaseName = modBaseName
 
 minecraft {
-    version = project.forgeVersion
-    runDir = "run"
-    mappings = project.mcpVersion
+//    runDir = "run"
+    mappings channel: 'stable', version: project.mcpVersion
 }
 
 repositories {
@@ -43,40 +46,50 @@ repositories {
 
 configurations {
     extraLibs
+    runtime.extendsFrom extraLibs
+    compile.extendsFrom extraLibs
+}
+
+
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/generated/resources'
+        }
+    }
 }
 
 dependencies {
-    compile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
+    minecraft "net.minecraftforge:forge:${project.forgeVersion}"
+    compileOnly "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
 
-    compile(project(':ElegantNetworkingCommon')) { transitive = false }
+//    compileOnly(project(':ElegantNetworkingCommon')) { transitive = false }
     extraLibs project(':ElegantNetworkingCommon')
 
     compileOnly 'org.projectlombok:lombok:1.18.8'
     annotationProcessor 'org.projectlombok:lombok:1.18.8', project(':ElegantNetworkingAnnotationProcessor')
 }
 
+shadowJar {
+    classifier = ''
+    configurations = [project.configurations.extraLibs]
+    dependencies {}
+}
+shadowJar.finalizedBy('reobfJar')
 compileJava {
     options.compilerArgs += [
             '-Aelegantnetworking.printDetails'
     ]
 }
 
-jar {
-    from {
-        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    if (!testBuild)
-        exclude('hohserg/elegant/networking/test/**')
-}
-
 processResources {
     inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    inputs.property "mcversion", project.mc_version
 
     from(sourceSets.main.resources.srcDirs) {
         include "mcmod.info"
 
-        expand "version": project.version, "mcversion": project.minecraft.version
+        expand "version": project.version, "mcversion": project.mc_version
     }
 
     from(sourceSets.main.resources.srcDirs) {
@@ -99,6 +112,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 artifacts {
     archives sourcesJar
     archives javadocJar
+    archives shadowJar
 }
 
 signing {
