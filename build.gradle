@@ -26,7 +26,6 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 sourceCompatibility = 1.8
-
 version = modVersion
 group = modGroup
 archivesBaseName = modBaseName
@@ -115,54 +114,32 @@ artifacts {
     archives shadowJar
 }
 
-signing {
-    required { project.hasProperty("signing.keyId") }
-    sign configurations.archives
-}
 
-uploadArchives {
+
+// signing {
+//     required { project.hasProperty("signing.keyId") }
+//     sign configurations.archives
+// }
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = project.group
+            artifactId = 'elegant-networking-1.12.2'
+            version = project.version
+
+            artifact sourcesJar
+            artifact javadocJar
+            artifact shadowJar
+        }
+    }
     repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            repository(url: releasesRepoUrl/*'file://localhost/' + new File(project.getProjectDir(),'repo').getAbsolutePath()*/) {
-                if (project.hasProperty("ossrhUsername"))
-                    authentication userName: "$ossrhUsername", password: "$ossrhPassword"
+        maven {
+            credentials {
+                username = System.getenv('MAVEN_USER')
+                password = System.getenv('MAVEN_PASSWORD')
             }
-
-            pom.artifactId = 'elegant-networking-1.12'
-            pom.project {
-                name 'ElegantNetworking MinecraftForge 1.12 library'
-                packaging 'jar'
-                description 'This is a runtime library of ElegantNetworking for MinecraftForge 1.12'
-                url 'https://github.com/ElegantNetworking/ElegantNetworkingRoot'
-
-                scm {
-                    connection = 'scm:git:https://github.com/ElegantNetworking/ElegantNetworking_1.12.git'
-                    developerConnection = 'scm:git:git@github.com:https://github.com/ElegantNetworking/ElegantNetworking_1.12.git'
-                    url = 'https://github.com/ElegantNetworking/ElegantNetworking_1.12'
-                }
-
-                licenses {
-                    license {
-                        name = 'GNU Lesser General Public License v3.0'
-                        url = 'https://raw.githubusercontent.com/ElegantNetworking/ElegantNetworking_1.12/master/LICENSE.md'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id = 'hohserg'
-                        name = 'hohserg'
-                        email = 'hohserg1@yandex.ru'
-                    }
-                }
-            }
-            pom.whenConfigured {
-                p -> p.dependencies = []
-            }
+            name = 'remote'
+            url = "https://nexus.tcoo.ru/repository/maven-releases/"
         }
     }
 }
