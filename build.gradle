@@ -11,7 +11,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-//        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+
         classpath 'net.ltgt.gradle:gradle-apt-plugin:0.9'
         classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
     }
@@ -30,7 +30,6 @@ group = modGroup
 archivesBaseName = modBaseName
 
 minecraft {
-//    runDir = "run"
     mappings channel: 'stable', version: project.mcpVersion
 }
 
@@ -61,7 +60,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${project.forgeVersion}"
     compileOnly "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
 
-//    compileOnly(project(':ElegantNetworkingCommon')) { transitive = false }
     extraLibs project(':ElegantNetworkingCommon')
 
     compileOnly 'org.projectlombok:lombok:1.18.8'
