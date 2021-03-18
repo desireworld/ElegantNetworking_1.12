@@ -91,6 +91,7 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
                 .onReceive(player);
     }
 
+    @SuppressWarnings("unchecked")
     private <A> A readObjectFromPacket(UniversalPacket packetRepresent, String channel) {
         return (A) packetRepresent.getPacket(channel);
     }
@@ -144,6 +145,7 @@ public class ForgeNetworkImpl implements Network<ForgeNetworkImpl.UniversalPacke
         private A packet;
         private ByteBuf buf;
 
+        @SuppressWarnings("unchecked")
         A getPacket(String channel) {
             id = buf.readByte();
             String packetName = Registry.getPacketName(channel, id);
